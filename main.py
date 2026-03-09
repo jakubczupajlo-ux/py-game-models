@@ -8,46 +8,41 @@ def main() -> None:
     with open("players.json", "r", encoding="utf-8") as file:
         players_data: list[dict[str, Any]] = json.load(file)
 
-    for player in players_data:
+    for player_data in players_data:
         # --- RACE ---
-        race_data = player["race"]
+        race_info = player_data["race"]
         race, _ = Race.objects.get_or_create(
-            name=race_data["name"],
-            defaults={"description": race_data.get("description", "")}
+            name=race_info["name"],
+            defaults={"description": race_info.get("description", "")}
         )
 
         # --- SKILLS ---
-        skills_data = race_data.get("skills", [])
-        for skill in skills_data:
+        for skill_info in race_info.get("skills", []):
             Skill.objects.get_or_create(
-                name=skill["name"],
+                name=skill_info["name"],
                 defaults={
-                    "bonus": skill["bonus"],
+                    "bonus": skill_info["bonus"],
                     "race": race
                 }
             )
 
         # --- GUILD ---
         guild_obj = None
-        guild_data = player.get("guild")
+        guild_info = player_data.get("guild")
 
-        if guild_data is not None:
+        if guild_info is not None:
             guild_obj, _ = Guild.objects.get_or_create(
-                name=guild_data["name"],
-                defaults={"description": guild_data.get("description")}
+                name=guild_info["name"],
+                defaults={"description": guild_info.get("description")}
             )
 
         # --- PLAYER ---
         Player.objects.get_or_create(
-            nickname=player["nickname"],
+            nickname=player_data["nickname"],
             defaults={
-                "email": player["email"],
-                "bio": player["bio"],
+                "email": player_data["email"],
+                "bio": player_data["bio"],
                 "race": race,
                 "guild": guild_obj,
             }
         )
-
-
-if __name__ == "__main__":
-    main()
