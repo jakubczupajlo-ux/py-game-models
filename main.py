@@ -1,42 +1,50 @@
 import json
-import init_django_orm  # noqa: F401
+from typing import Any
 
 from db.models import Race, Skill, Guild, Player
 
 
 def main() -> None:
-    with open("players.json", "r") as file:
-        players_data = json.load(file)
+    with open("players.json", "r", encoding="utf-8") as file:
+        players_data: list[dict[str, Any]] = json.load(file)
 
-    for nickname, data in players_data.items():
-        race_info = data.get("race")
+    for player in players_data:
+        # --- RACE ---
+        race_data = player["race"]
         race, _ = Race.objects.get_or_create(
-            name=race_info.get("name"),
-            defaults={"description": race_info.get("description")}
+            name=race_data["name"],
+            defaults={"description": race_data.get("description", "")}
         )
 
-        for skill_info in race_info.get("skills", []):
+        # --- SKILLS ---
+        skills_data = race_data.get("skills", [])
+        for skill in skills_data:
             Skill.objects.get_or_create(
-                name=skill_info.get("name"),
-                race=race,
-                defaults={"bonus": skill_info.get("bonus")}
+                name=skill["name"],
+                defaults={
+                    "bonus": skill["bonus"],
+                    "race": race
+                }
             )
 
-        guild_info = data.get("guild")
-        guild = None
-        if guild_info:
-            guild, _ = Guild.objects.get_or_create(
-                name=guild_info.get("name"),
-                defaults={"description": guild_info.get("description")}
+        # --- GUILD ---
+        guild_obj = None
+        guild_data = player.get("guild")
+
+        if guild_data is not None:
+            guild_obj, _ = Guild.objects.get_or_create(
+                name=guild_data["name"],
+                defaults={"description": guild_data.get("description")}
             )
 
+        # --- PLAYER ---
         Player.objects.get_or_create(
-            nickname=nickname,
+            nickname=player["nickname"],
             defaults={
-                "email": data.get("email"),
-                "bio": data.get("bio"),
+                "email": player["email"],
+                "bio": player["bio"],
                 "race": race,
-                "guild": guild
+                "guild": guild_obj,
             }
         )
 

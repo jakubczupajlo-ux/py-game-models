@@ -1,9 +1,13 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Race(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Skill(models.Model):
@@ -15,16 +19,23 @@ class Skill(models.Model):
         related_name="skills"
     )
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Guild(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Player(models.Model):
     nickname = models.CharField(max_length=255, unique=True)
     email = models.EmailField(max_length=255)
     bio = models.CharField(max_length=255)
+
     race = models.ForeignKey(
         Race,
         on_delete=models.CASCADE,
@@ -36,4 +47,8 @@ class Player(models.Model):
         null=True,
         related_name="players"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return self.nickname
