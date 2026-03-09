@@ -8,16 +8,11 @@ def main() -> None:
     with open("players.json", "r", encoding="utf-8") as file:
         raw = file.read().strip()
 
-    # Rozdziel obiekty JSON po '}\n{'
-    chunks = raw.split("}\n{")
+    # Rozdziel obiekty JSON po pustych liniach
+    chunks = [chunk.strip() for chunk in raw.split("\n\n") if chunk.strip()]
 
-    # Napraw format, żeby każdy chunk był poprawnym JSON-em
     json_objects: list[dict[str, Any]] = []
-    for i, chunk in enumerate(chunks):
-        if not chunk.startswith("{"):
-            chunk = "{" + chunk
-        if not chunk.endswith("}"):
-            chunk = chunk + "}"
+    for chunk in chunks:
         json_objects.append(json.loads(chunk))
 
     for player_data in json_objects:
