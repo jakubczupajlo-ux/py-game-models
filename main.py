@@ -6,16 +6,9 @@ from db.models import Race, Skill, Guild, Player
 
 def main() -> None:
     with open("players.json", "r", encoding="utf-8") as file:
-        raw = file.read().strip()
+        data: dict[str, Any] = json.load(file)
 
-    # Rozdziel obiekty JSON po pustych liniach
-    chunks = [chunk.strip() for chunk in raw.split("\n\n") if chunk.strip()]
-
-    json_objects: list[dict[str, Any]] = []
-    for chunk in chunks:
-        json_objects.append(json.loads(chunk))
-
-    for player_data in json_objects:
+    for nickname, player_data in data.items():
         race_info = player_data["race"]
         race, _ = Race.objects.get_or_create(
             name=race_info["name"],
@@ -40,7 +33,7 @@ def main() -> None:
             )
 
         Player.objects.get_or_create(
-            nickname=player_data["nickname"],
+            nickname=nickname,
             defaults={
                 "email": player_data["email"],
                 "bio": player_data["bio"],
